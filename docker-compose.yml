@@ -5,7 +5,7 @@ services:
     environment:
       - debug=true
       - retainFilesOnExit=true
-      - root=containers3root
+      - root=root
       - initialBuckets=cocrafter-dev
     ports:
       - 8001:9090

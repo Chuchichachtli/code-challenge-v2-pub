@@ -49,37 +49,11 @@ export class FoldersController {
     if (!targetFolder) {
       throw new Error('Parent folder not found');
     }
-    const siblingFolders: AppDocument[] = targetFolder.documents;
-    let flag = false;
 
-    let suffix = 0;
-    let newFolderName = (
-      defaultFolderName +
-      ' ' +
-      (suffix === 0 ? '' : suffix)
-    ).trim();
-
-    if (siblingFolders && siblingFolders.length) {
-      do {
-        for (let i = 0; i < siblingFolders.length; i++) {
-          if (siblingFolders[i].name === newFolderName) {
-            flag = true;
-            suffix++;
-            break;
-          }
-        }
-        flag = false;
-        newFolderName = (
-          defaultFolderName +
-          ' ' +
-          (suffix === 0 ? '' : suffix)
-        ).trim();
-      } while (flag);
-    }
     const data = new Folder();
     data.documents = [];
     data.parentFolder = targetFolder ?? undefined;
-    data.name = newFolderName;
+    data.name = defaultFolderName;
     return await this.service.create(data);
   }
 

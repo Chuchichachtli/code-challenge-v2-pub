@@ -44,7 +44,10 @@ export class FolderService {
   }
 
   async findOne(id: string): Promise<Folder | null> {
-    return await this.folderRepository.findOneBy({ id });
+    return await this.folderRepository.findOne({
+      where: { id },
+      relations: ['documents', 'parentFolder'],
+    });
   }
 
   async remove(id: string): Promise<void> {

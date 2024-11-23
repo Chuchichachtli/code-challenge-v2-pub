@@ -45,15 +45,6 @@ export class FoldersController {
     return this.service.findOne(id);
   }
 
-  @Post('/root')
-  async createRoot(): Promise<Folder> {
-    const data = new Folder();
-    data.documents = [];
-    data.parentFolder = null;
-    data.name = 'Root';
-    return await this.service.create(data);
-  }
-
   @Post()
   async create(@Body('parentId') parentId): Promise<Folder> {
     let defaultFolderName = 'New Folder';

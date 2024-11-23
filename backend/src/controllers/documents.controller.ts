@@ -71,7 +71,9 @@ export class DocumentsController {
     res.setHeader('Content-Type', file.ContentType);
     res.setHeader('Content-Disposition', `attachment; filename="${doc.name}"`);
 
-    const buffer = await file.Body.transformToByteArray();
+    const buffer = await this.s3Service.streamToBuffer(
+      file.Body as stream.Readable,
+    );
     const readableStream = stream.Readable.from(buffer);
     readableStream.pipe(res).send(buffer);
   }

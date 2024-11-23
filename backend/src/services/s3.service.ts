@@ -8,6 +8,7 @@ import {
   GetObjectCommandOutput,
   CopyObjectCommand,
 } from '@aws-sdk/client-s3';
+import { Readable } from 'stream';
 
 @Injectable()
 export class S3Service {
@@ -27,6 +28,13 @@ export class S3Service {
     });
   }
 
+  async streamToBuffer(stream: Readable): Promise<Buffer> {
+    const chunks = [];
+    for await (const chunk of stream) {
+      chunks.push(chunk);
+    }
+    return Buffer.concat(chunks);
+  }
   async getFile(path): Promise<GetObjectCommandOutput> {
     const params = {
       Bucket: this.bucketName,
@@ -101,7 +109,7 @@ export class S3Service {
       let s3Response = await this.s3.send(new PutObjectCommand(params));
       return s3Response;
     } catch (e) {
-      console.log(e);
+      throw new InternalServerErrorException(e, 'Error while uploading file');
     }
   }
 }

@@ -26,6 +26,9 @@ export class Folder {
   @JoinColumn()
   parentFolder: Folder;
 
-  @OneToMany(() => AppDocument, (doc) => doc.folder, { onDelete: 'CASCADE' })
+  @OneToMany(() => AppDocument, (doc) => doc.folder, {
+    onDelete: 'CASCADE',
+    eager: true,
+  })
   documents: AppDocument[];
 }

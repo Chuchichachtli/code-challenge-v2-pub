@@ -20,4 +20,7 @@ export class AppDocument {
   })
   @JoinColumn()
   folder: Folder;
+
+  @Column()
+  path: string;
 }

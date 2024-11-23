@@ -30,6 +30,7 @@ export class DocumentsController {
   @Post()
   @UseInterceptors(FileInterceptor('data'))
   uploadFile(@Body() parentId, @UploadedFile() data: Express.Multer.File) {
+    let documentPath;
     this.folderService.findOne(parentId['parentId']).then((folder) => {
       if (!folder) {
         throw new NotFoundException(`Folder with ID ${parentId} not found`);
@@ -38,12 +39,15 @@ export class DocumentsController {
       this.folderService
         .findPath(folder)
         .then((path) => {
+          documentPath = path;
           this.s3Service.uploadFile(data, path);
         })
         .then(() => {
           const newDocument = new AppDocument();
           newDocument.folder = folder;
           newDocument.name = data.originalname;
+          newDocument.path = documentPath + '/' + data.originalname;
+
           this.service.create(newDocument);
         });
     });
@@ -78,9 +82,8 @@ export class DocumentsController {
       if (!doc) {
         throw new NotFoundException(`Document with ID ${id} not found`);
       }
-      this.folderService.findPath(doc.folder).then((path) => {
-        this.s3Service.deleteFile(path + '/' + doc.name);
-      });
+
+      this.s3Service.deleteFile(doc.path);
     });
 
     return this.s3Service.deleteFile(id).then(() => {
@@ -90,20 +93,22 @@ export class DocumentsController {
 
   @Patch('/:id')
   updateFileName(@Body() name, @Param('id') id: string) {
+    let documentPath;
     this.service.findOne(id).then((doc) => {
       if (!doc) {
         throw new NotFoundException(`Document with ID ${id} not found`);
       }
 
       this.folderService.findPath(doc.folder).then((path) => {
+        documentPath = path + '/' + name['name'];
         this.s3Service
           .updateFileName(path + '/' + doc.name, path + '/' + name['name'])
           .then(() => {
-            return this.service.updateName(id, name['name']);
+            this.service.update(id, name['name'], documentPath);
           });
       });
     });
 
-    return this.service.updateName(id, name['name']);
+    return this.service.update(id, name['name'], documentPath);
   }
 }

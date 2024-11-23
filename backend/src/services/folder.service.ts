@@ -14,6 +14,42 @@ export class FolderService {
     return this.folderRepository.find();
   }
 
+  getChildrenFolderIdsFromTree(
+    folder: Folder,
+    folderIds: Array<string>,
+  ): Array<string> {
+    if (folder.children) {
+      for (const child of folder.children) {
+        this.getChildrenFolderIdsFromTree(child, folderIds);
+      }
+    }
+    folderIds.push(folder.id);
+
+    return folderIds;
+  }
+
+  getChildrenFoldersFromTree(
+    folder: Folder,
+    folders: Array<Folder>,
+  ): Array<Folder> {
+    if (folder.children) {
+      for (const child of folder.children) {
+        this.getChildrenFoldersFromTree(child, folders);
+      }
+    }
+    folders.push(folder);
+
+    return folders;
+  }
+
+  async getDocumentWithDescendants(folder: Folder): Promise<Folder> {
+    const folderTree = await this.folderRepository.findDescendantsTree(folder, {
+      relations: ['documents', 'parentFolder'],
+    });
+
+    return folderTree;
+  }
+
   /**
    * Written with the assumptuion that there is only one root folder and can not be deleted.
    * @returns Folder tree with all descendants and documents
@@ -46,7 +82,7 @@ export class FolderService {
   async findOne(id: string): Promise<Folder | null> {
     return await this.folderRepository.findOne({
       where: { id },
-      relations: ['documents', 'parentFolder'],
+      relations: ['documents', 'parentFolder', 'children'],
     });
   }
 
@@ -63,7 +99,11 @@ export class FolderService {
   }
 
   async findDescendants(folder: Folder): Promise<Folder[]> {
-    return await this.folderRepository.findDescendants(folder);
+    return (
+      await this.folderRepository.findDescendants(folder, {
+        relations: ['documents'],
+      })
+    ).filter((f) => f.id !== folder.id);
   }
 
   async findPath(folder: Folder): Promise<String> {

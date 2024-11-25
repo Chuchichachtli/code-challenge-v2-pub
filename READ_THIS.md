@@ -25,4 +25,5 @@ There are some things I'd do differently.
 - I was honestly a bit lazy to create DTOs for the endpoints for now.
 - I'd filter out parentFolder columns for the Folders.
 - I'd also add unique naming for new folders - like New Folder (1), New Folder (2) and so on. ---- DONE
+- Enforce unique sub folder naming in a folder
 - Also enforce path uniqueness for the documents, meaning no 2 document names in 1 folder could be the same. 
